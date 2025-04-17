@@ -1,40 +1,25 @@
-const express = require("express")
+const express = require("express");
+const { adminAuth, userAuth } = require("./middlewares/auth");
 
-const app = express()
-const PORT = 3000
+const app = express();
+const PORT = 3000;
 
-// app.use("/hello", (req, res) => {
-//     res.send("Hello Hello Hello") // Request Handler Function
-// })
-
-// app.use("/test", (req, res) => {
-//     res.send("Hello from the server") // Request Handler Function
-// })
-
-// app.use("/", (req, res) => {
-//     res.send("Hnjiiii") // Request Handler Function
-// })
-
-// app.use("/user", (req,res) => {
-//     res.send("Aa gye phir se maut ka tamasha dekhne")
-// })
+// Handle Auth Middleware for all request - GET, POST
+app.use("/admin", adminAuth)
+app.use("/user", userAuth)
 
 app.get("/user", (req, res) => {
-    res.send({firstName: "Tanmay", lastName: "Bansal"})
+    res.send("User Data Sent")
 })
 
-app.post("/user", (req,res) => {
-    res.send("Data Successfully saved to Database")
+app.get("/admin/getAllData", (req, res) => {
+    res.send("All Data Send")
 })
 
-app.delete("/user", (req,res) => {
-    res.send("Deleted Successfully")
-})
-
-app.put("/user", (req,res) => {
-    res.send("Data Updated")
+app.get("/admin/deleteUser", (req, res) => {
+    res.send("Delete Complete Data")
 })
 
 app.listen(PORT, () => {
-    console.log(`Server Started on Port: ${PORT}`)
-})
+    console.log(`Server Started on Port: ${PORT}`);
+});
