@@ -1,25 +1,18 @@
 const express = require("express");
-const { adminAuth, userAuth } = require("./middlewares/auth");
+const connectDB = require("./config/database")
 
 const app = express();
 const PORT = 3000;
 
-app.get("/getUserData", (req, res) => {
-    try{
-        throw new Error("Random Error")
-        res.send("User Data sent")  
-    }
-    catch (err) {
-        res.status(500).send("Some Error Contact Support Team")
-    }
+// Resolving the promise returned using try catch
+connectDB().then(() => {
+    console.log("Database Connection Established")
+    // Started the server after connecting to the database
+    app.listen(PORT, () => {
+        console.log(`Server Started on Port: ${PORT}`);
+    });
+})
+.catch((err) => {
+    console.log("Database cannot be connected", err)
 })
 
-app.use("/" ,(err, req, res, next) => {
-    if(err) {
-        res.status(500).send("Something Went Wrong")
-    }
-})
-
-app.listen(PORT, () => {
-    console.log(`Server Started on Port: ${PORT}`);
-});
