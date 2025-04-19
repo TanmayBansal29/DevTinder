@@ -1,13 +1,14 @@
 const express = require("express");
 const connectDB = require("./config/database")
 const User = require("./models/user");
-const { validateSignUpData } = require("./utils/validation");
+const { validateSignUpData, validateLoginData } = require("./utils/validation");
 const bcrypt = require("bcrypt")
 const app = express();
 const PORT = 3000;
 
 app.use(express.json()) // Middleware to convert the JSON to JS Object that can be stored in DB
 
+// Creating a New User into the database
 app.post("/signup", async (req,res) => {
     try {
         // Firstly -> Validation of data
@@ -24,6 +25,26 @@ app.post("/signup", async (req,res) => {
         })
         await user.save();
         res.send("User Added Successfully")
+    } catch (err) {
+        res.status(400).send("Error Saving the User: " + err.message)
+    }
+})
+
+// Login API - POST /login
+app.post("/login", async (req, res) => {
+    try{
+        validateLoginData(req)
+        const {emailId, password} = req.body
+        const user = await User.findOne({emailId: emailId})
+        if(!user) {
+            throw new Error("Invalid Credentials")
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password)
+        if(isPasswordValid) {
+            res.send("Login Successful!!")
+        } else {
+            throw new Error("Invalid Credentials")
+        }
     } catch (err) {
         res.status(400).send("Error Saving the User: " + err.message)
     }
