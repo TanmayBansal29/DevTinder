@@ -58,10 +58,21 @@ app.delete("/user", async (req, res) => {
 })
 
 // Update API - Update /user - Update the data using ID in database
-app.patch("/user", async (req, res) => {
-    const userId = req.body.userId
+app.patch("/user/:userId", async (req, res) => {
+    const userId = req.params?.userId
     const data = req.body
+
     try {
+        const ALLOWED_UPDATES = [
+            "photoUrl", "about", "gender", "age", "skills"
+        ]
+        const isUpdateAllowed = Object.keys(data).every((k) => ALLOWED_UPDATES.includes(k))
+        if(!isUpdateAllowed) {
+            throw new Error("Update Not Allowed")
+        }
+        if(data.skills.length > 10) {
+            throw new Error("Add only 10 Skills")
+        }
         const user = await User.findByIdAndUpdate({_id: userId}, data, {
             runValidators: "true"
         })
@@ -71,17 +82,17 @@ app.patch("/user", async (req, res) => {
     }
 })
 
-// Update API - Update /userEmail - Update the data using email ID in database
-app.patch("/userEmail", async (req, res) => {
-    const userEmail = req.body.emailId
-    const data = req.body
-    try {
-        const user = await User.findOneAndUpdate({emailId: userEmail}, data)
-        res.send("User Updated Successfully")
-    } catch (err) {
-        res.status(400).send("Something Went Wrong")
-    }
-})
+// // Update API - Update /userEmail - Update the data using email ID in database
+// app.patch("/userEmail", async (req, res) => {
+//     const userEmail = req.body.emailId
+//     const data = req.body
+//     try {
+//         const user = await User.findOneAndUpdate({emailId: userEmail}, data)
+//         res.send("User Updated Successfully")
+//     } catch (err) {
+//         res.status(400).send("Something Went Wrong")
+//     }
+// })
 
 // Resolving the promise returned using try catch
 connectDB().then(() => {
