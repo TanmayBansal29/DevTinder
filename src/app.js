@@ -4,13 +4,10 @@ const User = require("./models/user")
 const app = express();
 const PORT = 3000;
 
+app.use(express.json()) // Middleware to convert the JSON to JS Object that can be stored in DB
+
 app.post("/signup", async (req,res) => {
-    const userObj = {
-        firstName: "Virat",
-        lastName: "Kohli",
-        emailId: "virat.kohli@gmail.com",
-        password: "virat@123"
-    }
+    const userObj = req.body
 
     // Creating a new instance of user model
     const user = new User(userObj)
@@ -19,6 +16,71 @@ app.post("/signup", async (req,res) => {
         res.send("User Added Successfully")
     } catch (err) {
         res.status(400).send("Error Saving the User: " + err.message)
+    }
+})
+
+// Get User by email
+app.get("/user", async (req,res) => {
+    const userEmail = req.body.emailId
+
+    try {
+        const users = await User.findOne({emailId:userEmail})
+        //const users = await User.find({emailId: userEmail})
+        if(users.length === 0) {
+            res.status(404).send("User Not Found")
+        } else {
+            res.send(users)
+        }
+    } catch (err) {
+        res.status(400).send("Something Went Wrong")
+    }
+})
+
+// Feed API - GET /feed - get all the users from the database
+app.get("/feed", async (req, res) => {
+    try{
+        const users = await User.find({})
+        res.send(users)
+    } catch (err) {
+        res.status(400).send("Something Went Wrong")
+    }
+})
+
+// Delete API - DELETE /user - Delete a particular user from database
+app.delete("/user", async (req, res) => {
+    const userId = req.body.userId
+    try {
+        const user = await User.findByIdAndDelete(userId)
+        res.send("User Deleted Sucessfully")
+    } catch (err) {
+        res.status(400).send("Something Went Wrong")
+    }
+})
+
+// Update API - Update /user - Update the data using ID in database
+app.patch("/user", async (req, res) => {
+    const userId = req.body.userId
+    const data = req.body
+    try {
+        const user = await User.findByIdAndUpdate({_id: userId}, data, {
+            returnDocument: "before"
+        })
+        console.log(user)
+        res.send("User Updated Successfully")
+    } catch (err) {
+        res.status(400).send("Something Went Wrong")
+    }
+})
+
+// Update API - Update /userEmail - Update the data using email ID in database
+app.patch("/userEmail", async (req, res) => {
+    const userEmail = req.body.emailId
+    const data = req.body
+    try {
+        const user = await User.findOneAndUpdate({emailId: userEmail}, data)
+        res.send("User Updated Successfully")
+    } catch (err) {
+        res.status(400).send("Something Went Wrong")
     }
 })
 
