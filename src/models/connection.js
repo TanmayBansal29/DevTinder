@@ -13,11 +13,13 @@ const connectionSchema = mongoose.Schema({
         type: String,
         required: true,
         enum: {
-            values: ["ignore", "interested", "accepted", "rejected"],
-            message: `{Value} is not supported`
+            values: ["ignored", "interested", "accepted", "rejected"],
+            message: `{value} is not supported`
         }
     }
 }, {timestamps: true})
+
+connectionSchema.index({ fromUserId: 1, toUserId: 1 })
 
 connectionSchema.pre("save", function (next) {
     const connectionRequest = this;
