@@ -1,6 +1,7 @@
 const express = require("express")
 const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connection");
+const User = require("../models/user");
 const router = express.Router()
 
 const USER_SAFE_DATA = ["firstName", "lastName", "age", "gender", "photoUrl", "about", "skills"]
@@ -59,5 +60,37 @@ router.get("/user/connections", userAuth, async (req, res) => {
     }
 })
 
+// Feed API - to get all the cards of the people
+router.get("/feed", userAuth, async(req, res) => {
+    try {
+        const loggedInUser = req.user
+
+        // Find all the connection requests (sent + received)
+        const connectionRequests = await ConnectionRequest.find({
+            $or: [
+                {fromUserId: loggedInUser._id},
+                {toUserId: loggedInUser._id}
+            ]
+        }).select("fromUserId toUserId")
+
+        const hideUsersFromFeed = new Set();
+        connectionRequests.forEach(req => {
+            hideUsersFromFeed.add(req.fromUserId.toString());
+            hideUsersFromFeed.add(req.toUserId.toString())
+        })
+        console.log(hideUsersFromFeed)
+
+        const users = await User.find({
+            $and: [
+                {_id: {$nin: Array.from(hideUsersFromFeed)}},
+                {_id: {$ne: loggedInUser._id}}
+            ]
+        }).select(USER_SAFE_DATA)
+
+        res.send(users)
+    } catch (err) {
+        res.status(500).json({message: err.message})
+    }
+})
 
 module.exports = router
