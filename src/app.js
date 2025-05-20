@@ -1,6 +1,7 @@
 const express = require("express");
 const connectDB = require("./config/database")
 const cookieParser = require('cookie-parser')
+const cors = require("cors")
 const authRouter = require("./routes/auth")
 const profileRouter = require("./routes/profile")
 const requestRouter = require("./routes/request")
@@ -9,6 +10,10 @@ const userRouter = require("./routes/user")
 const app = express();
 const PORT = 3000;
 
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}))
 app.use(express.json()) // Middleware to convert the JSON to JS Object that can be stored in DB
 app.use(cookieParser())
 app.use("/", authRouter)
